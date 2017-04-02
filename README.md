@@ -14,22 +14,22 @@
 
 Sidebar generator for ARCANESOFT's admin dashboard.
 
-[badge_license]:     https://img.shields.io/packagist/l/arcanedev/sidebar.svg?style=flat-square
+[badge_license]:     https://img.shields.io/packagist/l/arcanesoft/sidebar.svg?style=flat-square
 [badge_arcanesoft]:  https://img.shields.io/badge/For-ARCANESOFT%20CMS-orange.svg?style=flat-square
-[badge_build]:       https://img.shields.io/travis/ARCANEDEV/Sidebar.svg?style=flat-square
-[badge_coverage]:    https://img.shields.io/scrutinizer/coverage/g/ARCANEDEV/Sidebar.svg?style=flat-square
-[badge_quality]:     https://img.shields.io/scrutinizer/g/ARCANEDEV/Sidebar.svg?style=flat-square
-[badge_insight]:     https://img.shields.io/sensiolabs/i/[id].svg?style=flat-square
-[badge_issues]:      https://img.shields.io/github/issues/ARCANEDEV/Sidebar.svg?style=flat-square
-[badge_package]:     https://img.shields.io/badge/package-arcanedev/sidebar-blue.svg?style=flat-square
-[badge_release]:     https://img.shields.io/packagist/v/arcanedev/sidebar.svg?style=flat-square
-[badge_downloads]:   https://img.shields.io/packagist/dt/arcanedev/sidebar.svg?style=flat-square
+[badge_build]:       https://img.shields.io/travis/ARCANESOFT/Sidebar.svg?style=flat-square
+[badge_coverage]:    https://img.shields.io/scrutinizer/coverage/g/ARCANESOFT/Sidebar.svg?style=flat-square
+[badge_quality]:     https://img.shields.io/scrutinizer/g/ARCANESOFT/Sidebar.svg?style=flat-square
+[badge_insight]:     https://img.shields.io/sensiolabs/i/f11d4cb3-9111-4733-8843-7bd62c4ab459.svg?style=flat-square
+[badge_issues]:      https://img.shields.io/github/issues/ARCANESOFT/Sidebar.svg?style=flat-square
+[badge_package]:     https://img.shields.io/badge/package-arcanesoft/sidebar-blue.svg?style=flat-square
+[badge_release]:     https://img.shields.io/packagist/v/arcanesoft/sidebar.svg?style=flat-square
+[badge_downloads]:   https://img.shields.io/packagist/dt/arcanesoft/sidebar.svg?style=flat-square
 
 [link-author]:          https://github.com/arcanedev-maroc
 [link-arcanesoft-repo]: https://github.com/ARCANESOFT/ARCANESOFT
-[link-github-issues]:   https://github.com/ARCANEDEV/Sidebar/issues
-[link-contributors]:    https://github.com/ARCANEDEV/Sidebar/graphs/contributors
-[link-packagist]:       https://packagist.org/packages/arcanedev/sidebar
-[link-travis]:          https://travis-ci.org/ARCANEDEV/Sidebar
-[link-scrutinizer]:     https://scrutinizer-ci.com/g/ARCANEDEV/Sidebar/?branch=master
-[link-insight]:         https://insight.sensiolabs.com/projects/[id]
+[link-github-issues]:   https://github.com/ARCANESOFT/Sidebar/issues
+[link-contributors]:    https://github.com/ARCANESOFT/Sidebar/graphs/contributors
+[link-packagist]:       https://packagist.org/packages/arcanesoft/sidebar
+[link-travis]:          https://travis-ci.org/ARCANESOFT/Sidebar
+[link-scrutinizer]:     https://scrutinizer-ci.com/g/ARCANESOFT/Sidebar/?branch=master
+[link-insight]:         https://insight.sensiolabs.com/projects/f11d4cb3-9111-4733-8843-7bd62c4ab459

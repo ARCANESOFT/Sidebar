@@ -83,6 +83,24 @@ interface Manager
     public function add(array $array);
 
     /**
+     * Load items from multiple config keys.
+     *
+     * @param  string  $key
+     *
+     * @return self
+     */
+    public function loadItemsFromConfig($key);
+
+    /**
+     * Load sidebar item from config file.
+     *
+     * @param  string  $key
+     *
+     * @return self
+     */
+    public function loadItemFromConfig($key);
+
+    /**
      * Render the sidebar.
      *
      * @param  string|null  $view

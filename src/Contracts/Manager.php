@@ -105,7 +105,7 @@ interface Manager
      *
      * @param  string|null  $view
      *
-     * @return string
+     * @return \Illuminate\Support\HtmlString
      */
     public function render($view = null);
 

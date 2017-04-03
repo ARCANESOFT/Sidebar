@@ -3,6 +3,7 @@
 use Arcanesoft\Sidebar\Contracts\Manager as ManagerContract;
 use Arcanesoft\Sidebar\Entities\Item;
 use Arcanesoft\Sidebar\Entities\ItemCollection;
+use Illuminate\Support\HtmlString;
 
 /**
  * Class     Manager
@@ -201,13 +202,15 @@ class Manager implements ManagerContract
      *
      * @param  string|null  $view
      *
-     * @return string
+     * @return \Illuminate\Support\HtmlString
      */
     public function render($view = null)
     {
         $this->syncCurrentName()->setView($view);
 
-        return view($this->view, ['sidebarItems' => $this->items])->render();
+        return new HtmlString(
+            view($this->view, ['sidebarItems' => $this->getItems()])->render()
+        );
     }
 
     /* -----------------------------------------------------------------

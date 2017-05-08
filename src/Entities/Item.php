@@ -1,6 +1,5 @@
 <?php namespace Arcanesoft\Sidebar\Entities;
 
-use Arcanesoft\Contracts\Auth\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
@@ -18,6 +17,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      |  Properties
      | -----------------------------------------------------------------
      */
+
     /**
      * The item name.
      *
@@ -54,13 +54,6 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     protected $active = false;
 
     /**
-     * The authenticated user.
-     *
-     * @var \Arcanesoft\Contracts\Auth\Models\User
-     */
-    protected $user;
-
-    /**
      * The item roles.
      *
      * @var array
@@ -85,6 +78,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      |  Constructor
      | -----------------------------------------------------------------
      */
+
     /**
      * Item constructor.
      *
@@ -107,6 +101,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      |  Getters & Setters
      | -----------------------------------------------------------------
      */
+
     /**
      * Get the item name.
      *
@@ -189,21 +184,6 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     {
         $this->children->setCurrent($name);
         $this->active = ($this->name === $name || $this->children->hasActiveItem());
-
-        return $this;
-    }
-
-    /**
-     * Set the authenticated user.
-     *
-     * @param  \Arcanesoft\Contracts\Auth\Models\User  $user
-     *
-     * @return self
-     */
-    public function setUser(User $user = null)
-    {
-        if ( ! is_null($user))
-            $this->user = $user;
 
         return $this;
     }
@@ -312,12 +292,11 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     /**
      * Make a Sidebar item from array.
      *
-     * @param  array                                   $array
-     * @param  \Arcanesoft\Contracts\Auth\Models\User  $user
+     * @param  array  $array
      *
      * @return self
      */
-    public static function makeFromArray(array $array, User $user = null)
+    public static function makeFromArray(array $array)
     {
         $item = self::make(
             $array['name'],
@@ -326,7 +305,6 @@ class Item implements Arrayable, Jsonable, JsonSerializable
             Arr::get($array, 'icon', null)
         );
 
-        $item->setUser($user);
         $item->setRoles(Arr::get($array, 'roles', []));
         $item->setPermissions(Arr::get($array, 'permissions', []));
         $item->addChildren(Arr::get($array, 'children', []));
@@ -374,7 +352,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function addChild(array $child)
     {
-        $item = self::makeFromArray($child, $this->user);
+        $item = self::makeFromArray($child);
 
         if ($item->allowed())
             $this->children->push($item);
@@ -386,6 +364,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      |  Check Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Check if the item is active one.
      *
@@ -413,23 +392,28 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function allowed()
     {
-        if (is_null($this->user) || ( ! $this->hasRoles() && ! $this->hasPermissions()))
+        /** @var  \Arcanesoft\Contracts\Auth\Models\User  $user */
+        $user = auth()->user();
+
+        if (is_null($user) || ( ! $this->hasRoles() && ! $this->hasPermissions()))
             return true;
 
-        if ($this->user->isAdmin())
+        if ($user->isAdmin())
             return true;
 
         foreach ($this->roles as $roleSlug) {
-            if ($this->user->hasRoleSlug($roleSlug))
+            if ($user->hasRoleSlug($roleSlug))
                 return true;
         }
 
         foreach ($this->permissions as $permissionSlug) {
-            if ($this->user->may($permissionSlug))
+            if ($user->may($permissionSlug))
                 return true;
         }
 
-        return false;
+        return $this->children()->first(function (Item $child) {
+            return $child->allowed();
+        }, false);
     }
 
     /**
@@ -456,6 +440,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      |  Other Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Get the instance as an array.
      *

@@ -14,6 +14,7 @@ class SidebarServiceProvider extends PackageServiceProvider
      |  Properties
      | -----------------------------------------------------------------
      */
+
     /**
      * Vendor name.
      *
@@ -32,6 +33,7 @@ class SidebarServiceProvider extends PackageServiceProvider
      |  Main Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Register the service provider.
      */
@@ -48,6 +50,8 @@ class SidebarServiceProvider extends PackageServiceProvider
     public function boot()
     {
         parent::boot();
+
+        //
     }
 
     /**

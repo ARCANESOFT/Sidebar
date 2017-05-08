@@ -17,6 +17,7 @@ class Manager implements ManagerContract
      |  Properties
      | -----------------------------------------------------------------
      */
+
     /**
      * The view name.
      *
@@ -49,19 +50,20 @@ class Manager implements ManagerContract
      |  Constructor
      | -----------------------------------------------------------------
      */
+
     /**
      * Manager constructor.
      */
     public function __construct()
     {
         $this->items = new ItemCollection;
-        $this->setAuthenticatedUser();
     }
 
     /* -----------------------------------------------------------------
      |  Getters & Setters
      | -----------------------------------------------------------------
      */
+
     /**
      * Set the view name.
      *
@@ -115,6 +117,7 @@ class Manager implements ManagerContract
      |  Main Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Add a routed item.
      *
@@ -155,9 +158,10 @@ class Manager implements ManagerContract
      */
     public function add(array $array)
     {
-        $item = Item::makeFromArray($array, $this->user);
+        $item = Item::makeFromArray($array);
 
-        if ($item->allowed()) $this->items->push($item);
+        if ($item->allowed())
+            $this->items->push($item);
 
         return $this;
     }
@@ -217,6 +221,7 @@ class Manager implements ManagerContract
      |  Check Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Check if the sidebar has items.
      *
@@ -231,6 +236,7 @@ class Manager implements ManagerContract
      |  Other Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Sync the current name wih the sidebar items.
      *
@@ -241,15 +247,5 @@ class Manager implements ManagerContract
         $this->items->setCurrent($this->currentName);
 
         return $this;
-    }
-
-    /**
-     * Get the authenticated user.
-     */
-    private function setAuthenticatedUser()
-    {
-        if (auth()->guest()) return;
-
-        $this->user = auth()->user()->load(['roles', 'roles.permissions']);
     }
 }

@@ -14,6 +14,7 @@ class ItemCollection extends Collection
      |  Getters & Setters
      | -----------------------------------------------------------------
      */
+
     /**
      * Set the current name to the items collection.
      *
@@ -32,6 +33,7 @@ class ItemCollection extends Collection
      |  Check Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Check if the items collection has an active one.
      *

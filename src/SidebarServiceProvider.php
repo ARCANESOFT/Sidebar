@@ -51,7 +51,7 @@ class SidebarServiceProvider extends PackageServiceProvider
     {
         parent::boot();
 
-        //
+        $this->publishViews();
     }
 
     /**

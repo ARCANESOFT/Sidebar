@@ -48,6 +48,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $config = $app['config'];
+
+        $config->set('view.paths', [
+            resource_path('views'),
+            realpath(__DIR__ .'/fixtures/resources/views'),
+        ]);
+
         $this->setUpRoutes($app['router']);
     }
 

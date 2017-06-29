@@ -23,7 +23,7 @@ class Manager implements ManagerContract
      *
      * @var string
      */
-    protected $view = '';
+    protected $view;
 
     /**
      * The current name.
@@ -203,15 +203,16 @@ class Manager implements ManagerContract
      * Render the sidebar.
      *
      * @param  string|null  $view
+     * @param  array|null   $data
      *
      * @return \Illuminate\Support\HtmlString
      */
-    public function render($view = null)
+    public function render($view = '_includes.sidebar.default', array $data = [])
     {
         $this->syncCurrentName()->setView($view);
 
         return new HtmlString(
-            view($this->view, ['sidebarItems' => $this->getItems()])->render()
+            view($this->view, array_merge($data, ['sidebarItems' => $this->getItems()]))->render()
         );
     }
 

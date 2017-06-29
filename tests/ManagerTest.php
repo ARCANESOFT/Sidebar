@@ -1,5 +1,7 @@
 <?php namespace Arcanesoft\Sidebar\Tests;
 
+use Symfony\Component\DomCrawler\Crawler;
+
 /**
  * Class     ManagerTest
  *
@@ -107,5 +109,56 @@ class ManagerTest extends TestCase
         ];
 
         $this->assertEquals($expected, $this->manager->getItems()->toArray());
+    }
+
+    /** @test */
+    public function it_can_render()
+    {
+        $this->manager->addItem('home', 'HOME', '/', 'home-icon');
+        $this->manager->add([
+            'name'     => 'blog',
+            'title'    => 'BLOG',
+            'url'      => '/blog',
+            'icon'     => 'blog-icon',
+            'roles'    => ['blog-manager'],
+            'children' => [
+                [
+                    'name'        => 'blog-posts',
+                    'title'       => 'POSTS',
+                    'url'         => '/blog/posts',
+                    'icon'        => 'posts-icon',
+                    'roles'       => [],
+                    'permissions' => ['blog.posts.crud']
+                ],
+                [
+                    'name'     => 'blog-categories',
+                    'title'    => 'CATEGORIES',
+                    'url'      => '/blog/categories',
+                    'icon'     => 'categories-icon',
+                    'roles'    => [],
+                    'permissions' => ['blog.categories.crud']
+                ],
+            ]
+        ]);
+
+        $rendered = $this->manager->render('sidebar');
+
+        $this->assertInstanceOf(\Illuminate\Support\HtmlString::class, $rendered);
+
+        $crawler = new Crawler($rendered->toHtml());
+
+        $this->assertCount(4, $crawler->filter('a'));
+        $this->assertCount(1, $crawler->filter('a[href="javascript:void(0);"]')); // BLOG link
+    }
+
+    /**
+     * @test
+     *
+     * @expectedException         \InvalidArgumentException
+     * @expectedExceptionMessage  View [_includes.sidebar.default] not found.
+     */
+    public function it_must_throw_an_error_if_view_not_found()
+    {
+        $this->manager->render();
     }
 }

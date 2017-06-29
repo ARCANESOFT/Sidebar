@@ -12,6 +12,7 @@ interface Manager
      |  Getters & Setters
      | -----------------------------------------------------------------
      */
+
     /**
      * Set the view name.
      *
@@ -48,6 +49,7 @@ interface Manager
      |  Main Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Add a routed item.
      *
@@ -113,6 +115,7 @@ interface Manager
      |  Check Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Check if the sidebar has items.
      *

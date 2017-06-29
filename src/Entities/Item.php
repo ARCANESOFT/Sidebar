@@ -126,20 +126,6 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     }
 
     /**
-     * Set the title.
-     *
-     * @param  string  $title
-     *
-     * @return self
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    /**
      * Get the item url.
      *
      * @return string
@@ -157,20 +143,6 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     public function icon()
     {
         return $this->icon;
-    }
-
-    /**
-     * Set the item icon.
-     *
-     * @param  string  $icon
-     *
-     * @return self
-     */
-    public function setIcon($icon)
-    {
-        $this->icon = $icon;
-
-        return $this;
     }
 
     /**
@@ -298,18 +270,14 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public static function makeFromArray(array $array)
     {
-        $item = self::make(
-            $array['name'],
-            $array['title'],
-            self::getUrlFromArray($array),
-            Arr::get($array, 'icon', null)
+        return tap(
+            self::make($array['name'], $array['title'], self::getUrlFromArray($array), Arr::get($array, 'icon', null)),
+            function (Item $item) use ($array) {
+                $item->setRoles(Arr::get($array, 'roles', []));
+                $item->setPermissions(Arr::get($array, 'permissions', []));
+                $item->addChildren(Arr::get($array, 'children', []));
+            }
         );
-
-        $item->setRoles(Arr::get($array, 'roles', []));
-        $item->setPermissions(Arr::get($array, 'permissions', []));
-        $item->addChildren(Arr::get($array, 'children', []));
-
-        return $item;
     }
 
     /**
@@ -321,10 +289,9 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     private static function getUrlFromArray(array $array)
     {
-        if (Arr::has($array, 'route'))
-            return route(Arr::get($array, 'route'));
-
-        return Arr::get($array, 'url', '#');
+        return Arr::has($array, 'route')
+            ? route(Arr::get($array, 'route'))
+            : Arr::get($array, 'url', '#');
     }
 
     /**
@@ -401,19 +368,19 @@ class Item implements Arrayable, Jsonable, JsonSerializable
         if ($user->isAdmin())
             return true;
 
-        foreach ($this->roles as $roleSlug) {
+        foreach ($this->getRoles() as $roleSlug) {
             if ($user->hasRoleSlug($roleSlug))
                 return true;
         }
 
-        foreach ($this->permissions as $permissionSlug) {
+        foreach ($this->getPermissions() as $permissionSlug) {
             if ($user->may($permissionSlug))
                 return true;
         }
 
-        return $this->children()->first(function (Item $child) {
+        return $this->children()->filter(function (Item $child) {
             return $child->allowed();
-        }, false);
+        })->isNotEmpty();
     }
 
     /**

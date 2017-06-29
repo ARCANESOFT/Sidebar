@@ -191,12 +191,10 @@ class Manager implements ManagerContract
      */
     public function loadItemFromConfig($key)
     {
-        if (config()->has($key)) {
+        if (config()->has($key))
             $this->add(config($key));
-        }
-        else {
+        else
             // Throw an exception ??
-        }
 
         return $this;
     }

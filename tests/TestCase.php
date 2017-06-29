@@ -48,6 +48,19 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        //
+        $this->setUpRoutes($app['router']);
+    }
+
+    /* -----------------------------------------------------------------
+     |  Other Methods
+     | -----------------------------------------------------------------
+     */
+
+    /**
+     * @param  \Illuminate\Routing\Router  $router
+     */
+    private function setUpRoutes($router)
+    {
+        $router->get('seo', function () { return 'SEO index page.'; })->name('seo.index');
     }
 }

@@ -41,8 +41,8 @@ class ItemCollection extends Collection
      */
     public function hasActiveItem()
     {
-        return ! $this->filter(function (Item $item) {
+        return $this->filter(function (Item $item) {
             return $item->isActive();
-        })->isEmpty();
+        })->isNotEmpty();
     }
 }

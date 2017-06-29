@@ -1,6 +1,7 @@
 <?php namespace Arcanesoft\Sidebar\Tests\Entities;
 
 use Arcanesoft\Sidebar\Entities\Item;
+use Arcanesoft\Sidebar\Tests\Stubs\Models\User;
 use Arcanesoft\Sidebar\Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ class ItemTest extends TestCase
      |  Tests
      | -----------------------------------------------------------------
      */
+
     /** @test */
     public function it_can_be_instantiated()
     {
@@ -158,10 +160,60 @@ class ItemTest extends TestCase
         $this->assertSame('sub-items', $item->childrenClass('sub-items'));
     }
 
+    /** @test */
+    public function it_can_check_if_user_is_allowed_to_access_this_item()
+    {
+        $item = tap($this->createItem('seo', 'SEO', 'SEO'), function (Item $item) {
+            $item->setRoles(['seo-manager']);
+            $item->setPermissions(['seo.manage']);
+            $item->addChildren([
+                [
+                    'title'       => 'Dashboard',
+                    'name'        => 'seo-dashboard',
+                    'url'         => 'seo/dashboard',
+                    'icon'        => 'fa fa-fw fa-bar-chart',
+                    'roles'       => ['seo-analyst'],
+                    'permissions' => ['seo.dashboard'],
+                ],
+            ]);
+        });
+
+        // Admin
+        $this->beUser(true, false, false);
+
+        $this->assertTrue($item->allowed());
+
+        // User has role
+        $this->beUser(false, $this->equalTo('seo-manager'), false);
+
+        $this->assertTrue($item->allowed());
+
+        // User has permission
+        $this->beUser(false, false, $this->equalTo('seo.manage'));
+
+        $this->assertTrue($item->allowed());
+
+        // User has role in children items
+        $this->beUser(false, $this->equalTo('seo-manager'), false);
+
+        $this->assertTrue($item->allowed());
+
+        // User has permission in children items
+        $this->beUser(false, false, $this->equalTo('seo.dashboard'));
+
+        $this->assertTrue($item->allowed());
+
+        // User (Without roles & permissions)
+        $this->beUser(false, false, false);
+
+        $this->assertFalse($item->allowed());
+    }
+
     /* -----------------------------------------------------------------
      |  Other Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Create a sidebar item.
      *
@@ -175,11 +227,28 @@ class ItemTest extends TestCase
      */
     private function createItem($name, $title, $url, array $roles = [], array $permissions = [])
     {
-        $item = new Item($name, $title, $url, $icon = 'fa fa-fw fa-home');
+        return tap(new Item($name, $title, $url, $icon = 'fa fa-fw fa-home'), function (Item $item) use ($roles, $permissions) {
+            $item->setRoles($roles);
+            $item->setPermissions($permissions);
+        });
+    }
 
-        $item->setRoles($roles);
-        $item->setPermissions($permissions);
 
-        return $item;
+    /**
+     * Mock the authentication.
+     *
+     * @param  mixed  $isAdminReturn
+     * @param  mixed  $hasRoleSlugReturn
+     * @param  mixed  $mayReturn
+     */
+    private function beUser($isAdminReturn, $hasRoleSlugReturn, $mayReturn)
+    {
+        $user = $this->createMock(User::class);
+        $user->method('isAdmin')->willReturn($isAdminReturn);
+        $user->method('hasRoleSlug')->willReturn($hasRoleSlugReturn);
+        $user->method('may')->willReturn($mayReturn);
+
+        /** @var  \Illuminate\Foundation\Auth\User  $user */
+        $this->be($user);
     }
 }

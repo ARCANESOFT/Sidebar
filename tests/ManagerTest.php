@@ -77,4 +77,35 @@ class ManagerTest extends TestCase
         $this->assertEmpty($item->getRoles());
         $this->assertEmpty($item->getPermissions());
     }
+
+    /** @test */
+    public function it_can_set_and_get_current_name()
+    {
+        $this->assertNull($this->manager->getCurrent());
+
+        $this->manager->setCurrent('seo-dashboard');
+
+        $this->assertSame('seo-dashboard', $this->manager->getCurrent());
+    }
+
+    /** @test */
+    public function it_can_add_item_with_route()
+    {
+        $this->manager->addRouteItem('seo', 'SEO', 'seo.index', [], 'seo-icon');
+
+        $expected = [
+            [
+                'name'        => 'seo',
+                'title'       => 'SEO',
+                'url'         => 'http://localhost/seo',
+                'icon'        => 'seo-icon',
+                'active'      => false,
+                'roles'       => [],
+                'permissions' => [],
+                'children'    => [],
+            ],
+        ];
+
+        $this->assertEquals($expected, $this->manager->getItems()->toArray());
+    }
 }

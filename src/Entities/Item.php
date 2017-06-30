@@ -1,5 +1,6 @@
 <?php namespace Arcanesoft\Sidebar\Entities;
 
+use Arcanesoft\Contracts\Auth\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
@@ -365,22 +366,10 @@ class Item implements Arrayable, Jsonable, JsonSerializable
         if (is_null($user) || ( ! $this->hasRoles() && ! $this->hasPermissions()))
             return true;
 
-        if ($user->isAdmin())
-            return true;
-
-        foreach ($this->getRoles() as $roleSlug) {
-            if ($user->hasRoleSlug($roleSlug))
-                return true;
-        }
-
-        foreach ($this->getPermissions() as $permissionSlug) {
-            if ($user->may($permissionSlug))
-                return true;
-        }
-
-        return $this->children()->filter(function (Item $child) {
-            return $child->allowed();
-        })->isNotEmpty();
+        return $user->isAdmin()
+            || $this->checkRoles($user)
+            || $this->checkPermission($user)
+            || $this->hasAllowedChild();
     }
 
     /**
@@ -447,5 +436,49 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    /**
+     * Check if the user has role.
+     *
+     * @param  \Arcanesoft\Contracts\Auth\Models\User  $user
+     *
+     * @return bool
+     */
+    private function checkRoles(User $user)
+    {
+        foreach ($this->getRoles() as $roleSlug) {
+            if ($user->hasRoleSlug($roleSlug)) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the user has permission.
+     *
+     * @param  \Arcanesoft\Contracts\Auth\Models\User  $user
+     *
+     * @return bool
+     */
+    private function checkPermission(User $user)
+    {
+        foreach ($this->getPermissions() as $permissionSlug) {
+            if ($user->may($permissionSlug)) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if has an allowed child.
+     *
+     * @return bool
+     */
+    private function hasAllowedChild()
+    {
+        return $this->children()->filter(function (Item $child) {
+            return $child->allowed();
+        })->isNotEmpty();
     }
 }

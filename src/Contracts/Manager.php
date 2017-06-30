@@ -94,15 +94,6 @@ interface Manager
     public function loadItemsFromConfig($key);
 
     /**
-     * Load sidebar item from config file.
-     *
-     * @param  string  $key
-     *
-     * @return self
-     */
-    public function loadItemFromConfig($key);
-
-    /**
      * Render the sidebar.
      *
      * @param  string|null  $view

@@ -161,4 +161,68 @@ class ManagerTest extends TestCase
     {
         $this->manager->render();
     }
+
+    /** @test */
+    public function it_can_load_sidebar_items_from_config()
+    {
+        $this->fakeSidebarConfigs();
+
+        $this->assertFalse($this->manager->hasItems());
+
+        $this->manager->loadItemsFromConfig('testing.sidebar.menus');
+
+        $this->assertTrue($this->manager->hasItems());
+        $this->assertCount(2, $this->manager->getItems());
+    }
+
+    /* -----------------------------------------------------------------
+     |  Other Methods
+     | -----------------------------------------------------------------
+     */
+
+    /**
+     * Fake the sidebar configs.
+     */
+    public function fakeSidebarConfigs()
+    {
+        /** @var  \Illuminate\Contracts\Config\Repository  $config */
+        $this->app['config']->set('testing.sidebar.menus', [
+            'testing.sidebar.items.menu-1',
+            'testing.sidebar.items.menu-2',
+        ]);
+
+        $this->app['config']->set('testing.sidebar.items', [
+            'menu-1' => [
+                'name'     => 'home',
+                'title'    => 'HOME',
+                'url'      => '/home',
+                'icon'     => 'home-icon',
+            ],
+            'menu-2' => [
+                'name'     => 'blog',
+                'title'    => 'BLOG',
+                'url'      => '/blog',
+                'icon'     => 'blog-icon',
+                'roles'    => ['blog-manager'],
+                'children' => [
+                    [
+                        'name'        => 'blog-posts',
+                        'title'       => 'POSTS',
+                        'url'         => '/blog/posts',
+                        'icon'        => 'posts-icon',
+                        'roles'       => [],
+                        'permissions' => ['blog.posts.crud']
+                    ],
+                    [
+                        'name'     => 'blog-categories',
+                        'title'    => 'CATEGORIES',
+                        'url'      => '/blog/categories',
+                        'icon'     => 'categories-icon',
+                        'roles'    => [],
+                        'permissions' => ['blog.categories.crud']
+                    ],
+                ]
+            ],
+        ]);
+    }
 }

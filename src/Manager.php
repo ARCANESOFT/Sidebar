@@ -175,26 +175,14 @@ class Manager implements ManagerContract
      */
     public function loadItemsFromConfig($key)
     {
-        foreach (config($key, []) as $configKey) {
-            $this->loadItemFromConfig($configKey);
+        foreach (config($key, []) as $key) {
+            if (config()->has($key)) {
+                $this->add(config($key));
+            }
+            else {
+                // Throw an exception ??
+            }
         }
-
-        return $this;
-    }
-
-    /**
-     * Load sidebar item from config file.
-     *
-     * @param  string  $key
-     *
-     * @return self
-     */
-    public function loadItemFromConfig($key)
-    {
-        if (config()->has($key))
-            $this->add(config($key));
-        else
-            // Throw an exception ??
 
         return $this;
     }

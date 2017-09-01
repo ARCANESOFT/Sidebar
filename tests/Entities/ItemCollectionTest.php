@@ -51,20 +51,22 @@ class ItemCollectionTest extends TestCase
                 'title'       => 'Home',
                 'url'         => '/',
                 'icon'        => 'home-icon',
+                'extra'       => [],
                 'active'      => false,
+                'children'    => [],
                 'roles'       => [],
                 'permissions' => [],
-                'children'    => [],
             ],
             [
                 'name'        => 'contact',
                 'title'       => 'CONTACT',
                 'url'         => '/contact',
                 'icon'        => 'contact-icon',
+                'extra'       => [],
                 'active'      => false,
+                'children'    => [],
                 'roles'       => [],
                 'permissions' => [],
-                'children'    => []
             ],
         ];
 

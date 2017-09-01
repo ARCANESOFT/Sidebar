@@ -2,9 +2,8 @@
 
 use Arcanesoft\Contracts\Auth\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
-use JsonSerializable;
+use Illuminate\Support\Fluent;
 
 /**
  * Class     Item
@@ -12,69 +11,8 @@ use JsonSerializable;
  * @package  Arcanesoft\Sidebar\Entitites
  * @author   ARCANEDEV <arcanedev.maroc@gmail.com>
  */
-class Item implements Arrayable, Jsonable, JsonSerializable
+class Item extends Fluent
 {
-    /* -----------------------------------------------------------------
-     |  Properties
-     | -----------------------------------------------------------------
-     */
-
-    /**
-     * The item name.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * The item title.
-     *
-     * @var string
-     */
-    protected $title;
-
-    /**
-     * The item url.
-     *
-     * @var string
-     */
-    protected $url;
-
-    /**
-     * The item icon.
-     *
-     * @var string
-     */
-    protected $icon;
-
-    /**
-     * The item active state.
-     *
-     * @var bool
-     */
-    protected $active = false;
-
-    /**
-     * The item roles.
-     *
-     * @var array
-     */
-    protected $roles      = [];
-
-    /**
-     * The item permissions.
-     *
-     * @var array
-     */
-    protected $permissions = [];
-
-    /**
-     * The item children (sub-items).
-     *
-     * @var \Arcanesoft\Sidebar\Entities\ItemCollection
-     */
-    protected $children;
-
     /* -----------------------------------------------------------------
      |  Constructor
      | -----------------------------------------------------------------
@@ -83,19 +21,19 @@ class Item implements Arrayable, Jsonable, JsonSerializable
     /**
      * Item constructor.
      *
-     * @param  string       $name
-     * @param  string       $title
-     * @param  string       $url
-     * @param  string|null  $icon
+     * @param  array  $attributes
      */
-    public function __construct($name, $title, $url, $icon = null)
+    public function __construct(array $attributes = [])
     {
-        $this->name     = $name;
-        $this->title    = $title;
-        $this->url      = $url;
-        $this->icon     = $icon;
-        $this->active   = false;
-        $this->children = new ItemCollection;
+        $keys = ['name', 'title', 'url', 'icon'];
+
+        parent::__construct(Arr::only($attributes, $keys) + [
+            'extra' => Arr::except($attributes, $keys)
+        ]);
+
+        $this->attributes['active']   = false;
+        $this->attributes['children'] = new ItemCollection;
+        $this->setRoles([])->setPermissions([]);
     }
 
     /* -----------------------------------------------------------------
@@ -110,7 +48,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function name()
     {
-        return $this->name;
+        return $this->get('name');
     }
 
     /**
@@ -123,7 +61,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
         /** @var \Illuminate\Translation\Translator $trans */
         $trans = trans();
 
-        return $trans->has($this->title) ? $trans->get($this->title) : $this->title;
+        return $trans->has($title = $this->get('title')) ? $trans->get($title) : $title;
     }
 
     /**
@@ -133,7 +71,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function url()
     {
-        return $this->url;
+        return $this->get('url');
     }
 
     /**
@@ -143,7 +81,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function icon()
     {
-        return $this->icon;
+        return $this->get('icon');
     }
 
     /**
@@ -155,8 +93,8 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function setCurrent($name)
     {
-        $this->children->setCurrent($name);
-        $this->active = ($this->name === $name || $this->children->hasActiveItem());
+        $this->attributes['children']->setCurrent($name);
+        $this->attributes['active'] = ($this->name() === $name || $this->children()->hasActiveItem());
 
         return $this;
     }
@@ -168,7 +106,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function getRoles()
     {
-        return $this->roles;
+        return $this->get('roles', []);
     }
 
     /**
@@ -180,7 +118,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function setRoles(array $roles)
     {
-        $this->roles = $roles;
+        $this->attributes['roles'] = $roles;
 
         return $this;
     }
@@ -192,7 +130,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function getPermissions()
     {
-        return $this->permissions;
+        return $this->get('permissions', []);
     }
 
     /**
@@ -204,7 +142,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function setPermissions(array $permissions)
     {
-        $this->permissions = $permissions;
+        $this->attributes['permissions'] = $permissions;
 
         return $this;
     }
@@ -216,7 +154,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function children()
     {
-        return $this->children;
+        return $this->get('children', new ItemCollection);
     }
 
     /**
@@ -259,7 +197,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public static function make($name, $title, $url, $icon = null)
     {
-        return new self($name, $title, $url, $icon);
+        return new self(compact('name', 'title', 'url', 'icon'));
     }
 
     /**
@@ -323,7 +261,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
         $item = self::makeFromArray($child);
 
         if ($item->allowed())
-            $this->children->push($item);
+            $this->attributes['children']->push($item);
 
         return $this;
     }
@@ -340,7 +278,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function isActive()
     {
-        return $this->active;
+        return (bool) $this->get('active', false);
     }
 
     /**
@@ -350,7 +288,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function hasChildren()
     {
-        return ! $this->children->isEmpty();
+        return ! $this->children()->isEmpty();
     }
 
     /**
@@ -379,7 +317,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function hasRoles()
     {
-        return ! empty($this->roles);
+        return ! empty($this->getRoles());
     }
 
     /**
@@ -389,7 +327,7 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
     public function hasPermissions()
     {
-        return ! empty($this->permissions);
+        return ! empty($this->getPermissions());
     }
 
     /* -----------------------------------------------------------------
@@ -398,44 +336,15 @@ class Item implements Arrayable, Jsonable, JsonSerializable
      */
 
     /**
-     * Get the instance as an array.
+     * Convert the instance to an array.
      *
      * @return array
      */
     public function toArray()
     {
-        return [
-            'name'        => $this->name(),
-            'title'       => $this->title(),
-            'url'         => $this->url(),
-            'icon'        => $this->icon(),
-            'active'      => $this->isActive(),
-            'roles'       => $this->roles,
-            'permissions' => $this->permissions,
-            'children'    => $this->children->toArray(),
-        ];
-    }
-
-    /**
-     * Convert the object to its JSON representation.
-     *
-     * @param  int  $options
-     *
-     * @return string
-     */
-    public function toJson($options = 0)
-    {
-        return json_encode($this->jsonSerialize(), $options);
-    }
-
-    /**
-     * Convert the object into something JSON serializable.
-     *
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
+        return array_map(function ($value) {
+            return $value instanceof Arrayable ? $value->toArray() : $value;
+        }, $this->attributes);
     }
 
     /**

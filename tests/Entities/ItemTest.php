@@ -92,10 +92,11 @@ class ItemTest extends TestCase
             'title'       => 'Home',
             'url'         => 'http://localhost',
             'icon'        => 'fa fa-fw fa-home',
+            'extra'       => [],
             'active'      => false,
+            'children'    => [],
             'roles'       => [],
             'permissions' => [],
-            'children'    => [],
         ];
 
         $this->assertSame($expected, $item->toArray());
@@ -227,7 +228,7 @@ class ItemTest extends TestCase
      */
     private function createItem($name, $title, $url, array $roles = [], array $permissions = [])
     {
-        return tap(new Item($name, $title, $url, $icon = 'fa fa-fw fa-home'), function (Item $item) use ($roles, $permissions) {
+        return tap(Item::make($name, $title, $url, $icon = 'fa fa-fw fa-home'), function (Item $item) use ($roles, $permissions) {
             $item->setRoles($roles);
             $item->setPermissions($permissions);
         });

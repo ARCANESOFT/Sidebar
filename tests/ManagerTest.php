@@ -101,10 +101,11 @@ class ManagerTest extends TestCase
                 'title'       => 'SEO',
                 'url'         => 'http://localhost/seo',
                 'icon'        => 'seo-icon',
+                'extra'       => [],
                 'active'      => false,
+                'children'    => [],
                 'roles'       => [],
                 'permissions' => [],
-                'children'    => [],
             ],
         ];
 

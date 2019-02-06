@@ -69,7 +69,7 @@ class Manager implements ManagerContract
      *
      * @param  string  $view
      *
-     * @return self
+     * @return $this
      */
     public function setView($view)
     {
@@ -127,7 +127,7 @@ class Manager implements ManagerContract
      * @param  array        $parameters
      * @param  string|null  $icon
      *
-     * @return self
+     * @return $this
      */
     public function addRouteItem($name, $title, $route, array $parameters = [], $icon = null)
     {
@@ -142,7 +142,7 @@ class Manager implements ManagerContract
      * @param  string       $url
      * @param  string|null  $icon
      *
-     * @return self
+     * @return $this
      */
     public function addItem($name, $title, $url = '#', $icon = null)
     {
@@ -154,7 +154,7 @@ class Manager implements ManagerContract
      *
      * @param  array  $array
      *
-     * @return self
+     * @return $this
      */
     public function add(array $array)
     {
@@ -171,7 +171,7 @@ class Manager implements ManagerContract
      *
      * @param  string  $key
      *
-     * @return self
+     * @return $this
      */
     public function loadItemsFromConfig($key)
     {
@@ -191,13 +191,13 @@ class Manager implements ManagerContract
      * Render the sidebar.
      *
      * @param  string|null  $view
-     * @param  array|null   $data
+     * @param  array        $data
      *
      * @return \Illuminate\Support\HtmlString
      */
-    public function render($view = '_includes.sidebar.default', array $data = [])
+    public function render($view = null, array $data = [])
     {
-        $this->syncCurrentName()->setView($view);
+        $this->syncCurrentName()->setView(is_null($view) ? '_includes.sidebar.default' : $view);
 
         return new HtmlString(
             view($this->view, array_merge($data, ['sidebarItems' => $this->getItems()]))->render()
@@ -227,7 +227,7 @@ class Manager implements ManagerContract
     /**
      * Sync the current name wih the sidebar items.
      *
-     * @return self
+     * @return $this
      */
     private function syncCurrentName()
     {

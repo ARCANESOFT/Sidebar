@@ -27,13 +27,14 @@ class Item extends Fluent
     {
         $keys = ['name', 'title', 'url', 'icon'];
 
-        parent::__construct(Arr::only($attributes, $keys) + [
+        parent::__construct(array_merge(Arr::only($attributes, $keys), [
             'extra' => Arr::except($attributes, $keys)
-        ]);
+        ]));
 
         $this->attributes['active']   = false;
         $this->attributes['children'] = new ItemCollection;
-        $this->setRoles([])->setPermissions([]);
+        $this->setRoles([]);
+        $this->setPermissions([]);
     }
 
     /* -----------------------------------------------------------------
@@ -357,7 +358,8 @@ class Item extends Fluent
     private function checkRoles(User $user)
     {
         foreach ($this->getRoles() as $roleSlug) {
-            if ($user->hasRoleSlug($roleSlug)) return true;
+            if ($user->hasRoleSlug($roleSlug))
+                return true;
         }
 
         return false;
@@ -373,7 +375,8 @@ class Item extends Fluent
     private function checkPermission(User $user)
     {
         foreach ($this->getPermissions() as $permissionSlug) {
-            if ($user->may($permissionSlug)) return true;
+            if ($user->may($permissionSlug))
+                return true;
         }
 
         return false;

@@ -18,7 +18,7 @@ interface Manager
      *
      * @param  string  $view
      *
-     * @return self
+     * @return $this
      */
     public function setView($view);
 
@@ -59,7 +59,7 @@ interface Manager
      * @param  array        $parameters
      * @param  string|null  $icon
      *
-     * @return self
+     * @return $this
      */
     public function addRouteItem($name, $title, $route, array $parameters = [], $icon = null);
 
@@ -71,7 +71,7 @@ interface Manager
      * @param  string       $url
      * @param  string|null  $icon
      *
-     * @return self
+     * @return $this
      */
     public function addItem($name, $title, $url = '#', $icon = null);
 
@@ -80,7 +80,7 @@ interface Manager
      *
      * @param  array  $array
      *
-     * @return self
+     * @return $this
      */
     public function add(array $array);
 
@@ -89,7 +89,7 @@ interface Manager
      *
      * @param  string  $key
      *
-     * @return self
+     * @return $this
      */
     public function loadItemsFromConfig($key);
 
@@ -97,10 +97,11 @@ interface Manager
      * Render the sidebar.
      *
      * @param  string|null  $view
+     * @param  array        $data
      *
      * @return \Illuminate\Support\HtmlString
      */
-    public function render($view = null);
+    public function render($view = null, array $data = []);
 
     /* -----------------------------------------------------------------
      |  Check Methods

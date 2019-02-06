@@ -1,17 +1,20 @@
 <?php namespace Arcanesoft\Sidebar\Tests;
 
+use Orchestra\Testbench\TestCase as BaseTestCase;
+
 /**
  * Class     TestCase
  *
  * @package  Arcanesoft\Sidebar\Tests
  * @author   ARCANEDEV <arcanedev.maroc@gmail.com>
  */
-abstract class TestCase extends \Orchestra\Testbench\TestCase
+abstract class TestCase extends BaseTestCase
 {
     /* -----------------------------------------------------------------
      |  Main Methods
      | -----------------------------------------------------------------
      */
+
     /**
      * Get package providers.
      *
@@ -24,20 +27,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         return [
             \Arcanesoft\Sidebar\Tests\Stubs\TestServiceProvider::class,
             \Arcanesoft\Sidebar\SidebarServiceProvider::class,
-        ];
-    }
-
-    /**
-     * Get package aliases.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     *
-     * @return array
-     */
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Sidebar' => \Arcanesoft\Sidebar\Facades\Sidebar::class,
         ];
     }
 

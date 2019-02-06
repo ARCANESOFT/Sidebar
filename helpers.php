@@ -1,5 +1,7 @@
 <?php
 
+use Arcanesoft\Sidebar\Contracts\Manager;
+
 if ( ! function_exists('sidebar')) {
     /**
      * Get the sidebar instance.
@@ -7,6 +9,6 @@ if ( ! function_exists('sidebar')) {
      * @return \Arcanesoft\Sidebar\Contracts\Manager
      */
     function sidebar() {
-        return app(Arcanesoft\Sidebar\Contracts\Manager::class);
+        return app(Manager::class);
     }
 }

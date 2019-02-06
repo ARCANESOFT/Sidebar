@@ -197,7 +197,7 @@ class Manager implements ManagerContract
      */
     public function render($view = null, array $data = [])
     {
-        $this->syncCurrentName()->setView(is_null($view) ? '_includes.sidebar.default' : $view);
+        $this->syncCurrentName()->setView($view ?: '_includes.sidebar.default');
 
         return new HtmlString(
             view($this->view, array_merge($data, ['sidebarItems' => $this->getItems()]))->render()

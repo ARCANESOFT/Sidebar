@@ -1,7 +1,5 @@
 <?php namespace Arcanesoft\Sidebar\Tests;
 
-use Symfony\Component\DomCrawler\Crawler;
-
 /**
  * Class     ManagerTest
  *
@@ -14,6 +12,7 @@ class ManagerTest extends TestCase
      |  Properties
      | -----------------------------------------------------------------
      */
+
     /** @var  \Arcanesoft\Sidebar\Contracts\Manager */
     private $manager;
 
@@ -21,6 +20,7 @@ class ManagerTest extends TestCase
      |  Main Methods
      | -----------------------------------------------------------------
      */
+
     public function setUp()
     {
         parent::setUp();
@@ -48,132 +48,267 @@ class ManagerTest extends TestCase
         ];
 
         foreach ($expectations as $expected) {
-            $this->assertInstanceOf($expected, $this->manager);
+            static::assertInstanceOf($expected, $this->manager);
         }
 
-        $this->assertFalse($this->manager->hasItems());
-        $this->assertCount(0, $this->manager->getItems());
-    }
-
-    /** @test */
-    public function it_can_add_one_item()
-    {
-        $this->manager->addItem(
-            $name = 'auth',
-            $title = 'Authorization',
-            $url = 'http://localhot/dashboard/auth',
-            $icon = 'fa fa-fw fa-users'
-        );
-
-        $this->assertTrue($this->manager->hasItems());
-
-        $items = $this->manager->getItems();
-
-        $this->assertCount(1, $items);
-
-        /** @var  \Arcanesoft\Sidebar\Entities\Item  $item */
-        $item = $items->first();
-
-        $this->assertSame($title, $item->title());
-        $this->assertSame($icon, $item->icon());
-        $this->assertEmpty($item->getRoles());
-        $this->assertEmpty($item->getPermissions());
-    }
-
-    /** @test */
-    public function it_can_set_and_get_current_name()
-    {
-        $this->assertNull($this->manager->getCurrent());
-
-        $this->manager->setCurrent('seo-dashboard');
-
-        $this->assertSame('seo-dashboard', $this->manager->getCurrent());
+        static::assertFalse($this->manager->hasItems());
+        static::assertCount(0, $this->manager->items());
     }
 
     /** @test */
     public function it_can_add_item_with_route()
     {
-        $this->manager->addRouteItem('seo', 'SEO', 'seo.index', [], 'seo-icon');
-
-        $expected = [
-            [
-                'name'        => 'seo',
-                'title'       => 'SEO',
-                'url'         => 'http://localhost/seo',
-                'icon'        => 'seo-icon',
-                'extra'       => [],
-                'active'      => false,
-                'children'    => [],
-                'roles'       => [],
-                'permissions' => [],
-            ],
-        ];
-
-        $this->assertEquals($expected, $this->manager->getItems()->toArray());
-    }
-
-    /** @test */
-    public function it_can_render()
-    {
-        $this->manager->addItem('home', 'HOME', '/', 'home-icon');
-        $this->manager->add([
-            'name'     => 'blog',
-            'title'    => 'BLOG',
-            'url'      => '/blog',
-            'icon'     => 'blog-icon',
-            'roles'    => ['blog-manager'],
-            'children' => [
-                [
-                    'name'        => 'blog-posts',
-                    'title'       => 'POSTS',
-                    'url'         => '/blog/posts',
-                    'icon'        => 'posts-icon',
-                    'roles'       => [],
-                    'permissions' => ['blog.posts.crud']
-                ],
-                [
-                    'name'     => 'blog-categories',
-                    'title'    => 'CATEGORIES',
-                    'url'      => '/blog/categories',
-                    'icon'     => 'categories-icon',
-                    'roles'    => [],
-                    'permissions' => ['blog.categories.crud']
-                ],
-            ]
+        $this->manager->add($item = [
+            'name'        => 'seo',
+            'title'       => 'SEO',
+            'url'         => 'http://localhost/seo',
+            'icon'        => 'seo-icon',
+            'active'      => false,
+            'children'    => [],
+            'roles'       => [],
+            'permissions' => [],
         ]);
 
-        $rendered = $this->manager->render('sidebar');
-
-        $this->assertInstanceOf(\Illuminate\Support\HtmlString::class, $rendered);
-
-        $crawler = new Crawler($rendered->toHtml());
-
-        $this->assertCount(4, $crawler->filter('a'));
-        $this->assertCount(1, $crawler->filter('a[href="javascript:void(0);"]')); // BLOG link
-    }
-
-    /**
-     * @test
-     *
-     * @expectedException         \InvalidArgumentException
-     * @expectedExceptionMessage  View [_includes.sidebar.default] not found.
-     */
-    public function it_must_throw_an_error_if_view_not_found()
-    {
-        $this->manager->render();
+        static::assertEquals([$item], $this->manager->items()->toArray());
     }
 
     /** @test */
     public function it_can_load_sidebar_items_from_config()
     {
-        $this->fakeSidebarConfigs();
+        $this->fakeSidebarItemsConfig();
 
-        $this->assertFalse($this->manager->hasItems());
+        static::assertFalse($this->manager->hasItems());
 
-        $this->manager->loadItemsFromConfig('testing.sidebar.menus');
+        $this->manager->loadFromConfig('testing.sidebar.menus');
 
-        $this->assertTrue($this->manager->hasItems());
-        $this->assertCount(2, $this->manager->getItems());
+        static::assertTrue($this->manager->hasItems());
+        static::assertCount(2, $this->manager->items());
+    }
+
+    /** @test */
+    public function it_can_load_sidebar_items_from_array()
+    {
+        static::assertCount(0, $this->manager->items());
+
+        $this->manager->loadFromArray([
+            [
+                'name'     => 'home',
+                'title'    => 'HOME',
+                'url'      => '/home',
+                'icon'     => 'home-icon',
+            ],
+            [
+                'name'     => 'blog',
+                'title'    => 'BLOG',
+                'url'      => '/blog',
+                'icon'     => 'blog-icon',
+                'roles'    => ['blog-manager'],
+                'children' => [
+                    [
+                        'name'        => 'blog-posts',
+                        'title'       => 'POSTS',
+                        'url'         => '/blog/posts',
+                        'icon'        => 'posts-icon',
+                        'roles'       => [],
+                        'permissions' => ['blog.posts.crud']
+                    ],
+                    [
+                        'name'        => 'blog-categories',
+                        'title'       => 'CATEGORIES',
+                        'url'         => '/blog/categories',
+                        'icon'        => 'categories-icon',
+                        'roles'       => [],
+                        'permissions' => ['blog.categories.crud']
+                    ],
+                ],
+            ],
+        ]);
+
+        static::assertCount(2, $this->manager->items());
+
+        $expected = [
+            [
+                'name'        => 'home',
+                'title'       => 'HOME',
+                'url'         => "{$this->baseUrl}/home",
+                'icon'        => 'home-icon',
+                'active'      => false,
+                'children'    => [],
+                'roles'       => [],
+                'permissions' => [],
+            ],
+            [
+                'name'        => 'blog',
+                'title'       => 'BLOG',
+                'url'         => "{$this->baseUrl}/blog",
+                'icon'        => 'blog-icon',
+                'active'      => false,
+                'children'    => [
+                    [
+                        'name'        => 'blog-posts',
+                        'title'       => 'POSTS',
+                        'url'         => "{$this->baseUrl}/blog/posts",
+                        'icon'        => 'posts-icon',
+                        'active'      => false,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.posts.crud',
+                        ],
+                    ],
+                    [
+                        'name'        => 'blog-categories',
+                        'title'       => 'CATEGORIES',
+                        'url'         => "{$this->baseUrl}/blog/categories",
+                        'icon'        => 'categories-icon',
+                        'active'      => false,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.categories.crud',
+                        ],
+                    ],
+                ],
+                'roles'       => [
+                    'blog-manager',
+                ],
+                'permissions' => [],
+            ],
+        ];
+
+        static::assertEquals($expected, $this->manager->items()->toArray());
+    }
+
+    /** @test */
+    public function it_can_set_selected_sidebar_item()
+    {
+        $this->fakeSidebarItemsConfig();
+
+        $this->manager->loadFromConfig('testing.sidebar.menus');
+
+        static::assertTrue($this->manager->hasItems());
+
+        $expected = [
+            [
+                'name'        => 'home',
+                'title'       => 'HOME',
+                'url'         => "{$this->baseUrl}/home",
+                'icon'        => 'home-icon',
+                'active'      => true,
+                'children'    => [],
+                'roles'       => [],
+                'permissions' => [],
+            ],
+            [
+                'name'        => 'blog',
+                'title'       => 'BLOG',
+                'url'         => "{$this->baseUrl}/blog",
+                'icon'        => 'blog-icon',
+                'active'      => false,
+                'children'    => [
+                    [
+                        'name'        => 'blog-posts',
+                        'title'       => 'POSTS',
+                        'url'         => "{$this->baseUrl}/blog/posts",
+                        'icon'        => 'posts-icon',
+                        'active'      => false,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.posts.crud',
+                        ],
+                    ],
+                    [
+                        'name'        => 'blog-categories',
+                        'title'       => 'CATEGORIES',
+                        'url'         => "{$this->baseUrl}/blog/categories",
+                        'icon'        => 'categories-icon',
+                        'active'      => false,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.categories.crud',
+                        ],
+                    ],
+                ],
+                'roles'       => [
+                    'blog-manager',
+                ],
+                'permissions' => [],
+            ],
+        ];
+
+        $this->manager->setSelectedItem('home');
+
+        static::assertEquals($expected, $this->manager->items()->toArray());
+
+        $expected = [
+            [
+                'name'        => 'home',
+                'title'       => 'HOME',
+                'url'         => "{$this->baseUrl}/home",
+                'icon'        => 'home-icon',
+                'active'      => false,
+                'children'    => [],
+                'roles'       => [],
+                'permissions' => [],
+            ],
+            [
+                'name'        => 'blog',
+                'title'       => 'BLOG',
+                'url'         => "{$this->baseUrl}/blog",
+                'icon'        => 'blog-icon',
+                'active'      => true,
+                'children'    => [
+                    [
+                        'name'        => 'blog-posts',
+                        'title'       => 'POSTS',
+                        'url'         => "{$this->baseUrl}/blog/posts",
+                        'icon'        => 'posts-icon',
+                        'active'      => false,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.posts.crud',
+                        ],
+                    ],
+                    [
+                        'name'        => 'blog-categories',
+                        'title'       => 'CATEGORIES',
+                        'url'         => "{$this->baseUrl}/blog/categories",
+                        'icon'        => 'categories-icon',
+                        'active'      => true,
+                        'children'    => [],
+                        'roles'       => [],
+                        'permissions' => [
+                            'blog.categories.crud',
+                        ],
+                    ],
+                ],
+                'roles'       => [
+                    'blog-manager',
+                ],
+                'permissions' => [],
+            ],
+        ];
+
+        $this->manager->setSelectedItem('blog-categories');
+
+        static::assertEquals($expected, $this->manager->items()->toArray());
+    }
+
+    /** @test */
+    public function it_can_show_and_hide_sidebar()
+    {
+        static::assertTrue($this->manager->isShown());
+
+        $this->manager->hide();
+
+        static::assertFalse($this->manager->isShown());
+
+        $this->manager->show();
+
+        static::assertTrue($this->manager->isShown());
     }
 
     /* -----------------------------------------------------------------
@@ -184,7 +319,7 @@ class ManagerTest extends TestCase
     /**
      * Fake the sidebar configs.
      */
-    public function fakeSidebarConfigs()
+    public function fakeSidebarItemsConfig()
     {
         /** @var  \Illuminate\Contracts\Config\Repository  $config */
         $this->app['config']->set('testing.sidebar.menus', [
@@ -222,7 +357,7 @@ class ManagerTest extends TestCase
                         'roles'    => [],
                         'permissions' => ['blog.categories.crud']
                     ],
-                ]
+                ],
             ],
         ]);
     }

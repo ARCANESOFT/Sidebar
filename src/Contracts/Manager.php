@@ -14,66 +14,25 @@ interface Manager
      */
 
     /**
-     * Set the view name.
+     * Set the selected item.
      *
-     * @param  string  $view
-     *
-     * @return $this
-     */
-    public function setView($view);
-
-    /**
-     * Get the current item name.
-     *
-     * @return string
-     */
-    public function getCurrent();
-
-    /**
-     * Set the current item name.
-     *
-     * @param  string  $currentName
+     * @param  string  $name
      *
      * @return $this
      */
-    public function setCurrent($currentName);
+    public function setSelectedItem(string $name);
 
     /**
      * Get the sidebar items.
      *
-     * @return \Arcanesoft\Sidebar\Entities\ItemCollection
+     * @return \Arcanesoft\Sidebar\Collection
      */
-    public function getItems();
+    public function items();
 
     /* -----------------------------------------------------------------
      |  Main Methods
      | -----------------------------------------------------------------
      */
-
-    /**
-     * Add a routed item.
-     *
-     * @param  string       $name
-     * @param  string       $title
-     * @param  string       $route
-     * @param  array        $parameters
-     * @param  string|null  $icon
-     *
-     * @return $this
-     */
-    public function addRouteItem($name, $title, $route, array $parameters = [], $icon = null);
-
-    /**
-     * Add an item.
-     *
-     * @param  string       $name
-     * @param  string       $title
-     * @param  string       $url
-     * @param  string|null  $icon
-     *
-     * @return $this
-     */
-    public function addItem($name, $title, $url = '#', $icon = null);
 
     /**
      * Add an item from array.
@@ -85,23 +44,36 @@ interface Manager
     public function add(array $array);
 
     /**
+     * Load items from array.
+     *
+     * @param  array  $array
+     *
+     * @return mixed
+     */
+    public function loadFromArray(array $array);
+
+    /**
      * Load items from multiple config keys.
      *
      * @param  string  $key
      *
      * @return $this
      */
-    public function loadItemsFromConfig($key);
+    public function loadFromConfig($key);
 
     /**
-     * Render the sidebar.
+     * Show the sidebar.
      *
-     * @param  string|null  $view
-     * @param  array        $data
-     *
-     * @return \Illuminate\Support\HtmlString
+     * @return $this
      */
-    public function render($view = null, array $data = []);
+    public function show();
+
+    /**
+     * Hide the sidebar.
+     *
+     * @return $this
+     */
+    public function hide();
 
     /* -----------------------------------------------------------------
      |  Check Methods
@@ -114,4 +86,11 @@ interface Manager
      * @return bool
      */
     public function hasItems();
+
+    /**
+     * Check if the sidebar is shown.
+     *
+     * @return bool
+     */
+    public function isShown();
 }

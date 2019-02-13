@@ -1,9 +1,7 @@
 <?php namespace Arcanesoft\Sidebar;
 
 use Arcanesoft\Sidebar\Contracts\Manager as ManagerContract;
-use Arcanesoft\Sidebar\Entities\Item;
-use Arcanesoft\Sidebar\Entities\ItemCollection;
-use Illuminate\Support\HtmlString;
+use Illuminate\Support\Collection as IlluminateCollection;
 
 /**
  * Class     Manager
@@ -18,45 +16,20 @@ class Manager implements ManagerContract
      | -----------------------------------------------------------------
      */
 
-    /**
-     * The view name.
-     *
-     * @var string
-     */
-    protected $view;
-
-    /**
-     * The current name.
-     *
-     * @var string
-     */
-    protected $currentName;
-
-    /**
-     * The sidebar items collection.
-     *
-     * @var \Arcanesoft\Sidebar\Entities\ItemCollection
-     */
+    /** @var  \Arcanesoft\Sidebar\Collection */
     protected $items;
 
-    /**
-     * The authenticated user.
-     *
-     * @var \Arcanesoft\Contracts\Auth\Models\User
-     */
-    protected $user;
+    /** @var  bool */
+    protected $shown = true;
 
     /* -----------------------------------------------------------------
      |  Constructor
      | -----------------------------------------------------------------
      */
 
-    /**
-     * Manager constructor.
-     */
     public function __construct()
     {
-        $this->items = new ItemCollection;
+        $this->items = new Collection;
     }
 
     /* -----------------------------------------------------------------
@@ -65,40 +38,15 @@ class Manager implements ManagerContract
      */
 
     /**
-     * Set the view name.
+     * Set the selected item.
      *
-     * @param  string  $view
-     *
-     * @return $this
-     */
-    public function setView($view)
-    {
-        if ( ! is_null($view))
-            $this->view = $view;
-
-        return $this;
-    }
-
-    /**
-     * Get the current item name.
-     *
-     * @return string
-     */
-    public function getCurrent()
-    {
-        return $this->currentName;
-    }
-
-    /**
-     * Set the current item name.
-     *
-     * @param  string  $currentName
+     * @param  string  $name
      *
      * @return $this
      */
-    public function setCurrent($currentName)
+    public function setSelectedItem(string $name)
     {
-        $this->currentName = $currentName;
+        $this->items->setSelected($name);
 
         return $this;
     }
@@ -106,9 +54,9 @@ class Manager implements ManagerContract
     /**
      * Get the sidebar items.
      *
-     * @return \Arcanesoft\Sidebar\Entities\ItemCollection
+     * @return \Arcanesoft\Sidebar\Collection
      */
-    public function getItems()
+    public function items()
     {
         return $this->items;
     }
@@ -119,68 +67,17 @@ class Manager implements ManagerContract
      */
 
     /**
-     * Add a routed item.
+     * Load the sidebar items from config files.
      *
-     * @param  string       $name
-     * @param  string       $title
-     * @param  string       $route
-     * @param  array        $parameters
-     * @param  string|null  $icon
+     * @param  array  $items
      *
      * @return $this
      */
-    public function addRouteItem($name, $title, $route, array $parameters = [], $icon = null)
+    public function loadFromArray(array $items)
     {
-        return $this->addItem($name, $title, route($route, $parameters), $icon);
-    }
-
-    /**
-     * Add an item.
-     *
-     * @param  string       $name
-     * @param  string       $title
-     * @param  string       $url
-     * @param  string|null  $icon
-     *
-     * @return $this
-     */
-    public function addItem($name, $title, $url = '#', $icon = null)
-    {
-        return $this->add(compact('name', 'title', 'url', 'icon'));
-    }
-
-    /**
-     * Add an item from array.
-     *
-     * @param  array  $array
-     *
-     * @return $this
-     */
-    public function add(array $array)
-    {
-        $item = Item::makeFromArray($array);
-
-        if ($item->allowed())
-            $this->items->push($item);
-
-        return $this;
-    }
-
-    /**
-     * Load items from multiple config keys.
-     *
-     * @param  string  $key
-     *
-     * @return $this
-     */
-    public function loadItemsFromConfig($key)
-    {
-        foreach (config($key, []) as $key) {
-            if (config()->has($key)) {
-                $this->add(config($key));
-            }
-            else {
-                // Throw an exception ??
+        foreach ($items as $item) {
+            if (is_array($item) && ! empty($item)) {
+                $this->add($item);
             }
         }
 
@@ -188,20 +85,69 @@ class Manager implements ManagerContract
     }
 
     /**
-     * Render the sidebar.
+     * Load sidebar items from config file(s).
      *
-     * @param  string|null  $view
-     * @param  array        $data
+     * @param  string  $key
      *
-     * @return \Illuminate\Support\HtmlString
+     * @return $this
      */
-    public function render($view = null, array $data = [])
+    public function loadFromConfig($key)
     {
-        $this->syncCurrentName()->setView($view ?: '_includes.sidebar.default');
+        $items = new IlluminateCollection(config()->get($key, []));
 
-        return new HtmlString(
-            view($this->view, array_merge($data, ['sidebarItems' => $this->getItems()]))->render()
-        );
+        if ($items->isEmpty()) return $this;
+
+        $allHasConfig = $items->every(function ($item) {
+            return config()->has($item);
+        });
+
+        if ($allHasConfig) {
+            $items->each(function ($item) {
+                $this->loadFromConfig($item);
+            });
+
+            return $this;
+        }
+
+        return $this->add($items->toArray());
+    }
+
+    /**
+     * Add an item from array.
+     *
+     * @param  array  $item
+     *
+     * @return $this
+     */
+    public function add(array $item)
+    {
+        $this->items->addItem($item);
+
+        return $this;
+    }
+
+    /**
+     * Show the sidebar.
+     *
+     * @return $this
+     */
+    public function show()
+    {
+        $this->shown = true;
+
+        return $this;
+    }
+
+    /**
+     * Hide the sidebar.
+     *
+     * @return $this
+     */
+    public function hide()
+    {
+        $this->shown = false;
+
+        return $this;
     }
 
     /* -----------------------------------------------------------------
@@ -216,23 +162,16 @@ class Manager implements ManagerContract
      */
     public function hasItems()
     {
-        return ! $this->items->isEmpty();
+        return $this->items->isNotEmpty();
     }
 
-    /* -----------------------------------------------------------------
-     |  Other Methods
-     | -----------------------------------------------------------------
-     */
-
     /**
-     * Sync the current name wih the sidebar items.
+     * Check if the sidebar is shown.
      *
-     * @return $this
+     * @return bool
      */
-    private function syncCurrentName()
+    public function isShown()
     {
-        $this->items->setCurrent($this->currentName);
-
-        return $this;
+        return $this->shown === true;
     }
 }

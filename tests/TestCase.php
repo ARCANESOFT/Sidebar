@@ -1,5 +1,6 @@
 <?php namespace Arcanesoft\Sidebar\Tests;
 
+use Arcanedev\Support\Stub;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 /**
@@ -57,6 +58,8 @@ abstract class TestCase extends BaseTestCase
      */
     private function setUpRoutes($router)
     {
+        $router->get('/', function () { return 'Home page.'; })->name('home');
+        $router->get('contact', ['uses' => 'Arcanesoft\Sidebar\Tests\Stubs\Contrllers\PagesControler@contact'])->name('contact');
         $router->get('seo', function () { return 'SEO index page.'; })->name('seo.index');
     }
 }

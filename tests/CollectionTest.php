@@ -1,16 +1,14 @@
-<?php namespace Arcanesoft\Sidebar\Tests\Entities;
+<?php namespace Arcanesoft\Sidebar\Tests;
 
-use Arcanesoft\Sidebar\Entities\Item;
-use Arcanesoft\Sidebar\Entities\ItemCollection;
-use Arcanesoft\Sidebar\Tests\TestCase;
+use Arcanesoft\Sidebar\Collection;
 
 /**
- * Class     ItemCollectionTest
+ * Class     CollectionTest
  *
- * @package  Arcanesoft\Sidebar\Tests\Entities
+ * @package  Arcanesoft\Sidebar\Tests
  * @author   ARCANEDEV <arcanedev.maroc@gmail.com>
  */
-class ItemCollectionTest extends TestCase
+class CollectionTest extends TestCase
 {
     /* -----------------------------------------------------------------
      |  Test
@@ -20,10 +18,10 @@ class ItemCollectionTest extends TestCase
     /** @test */
     public function it_can_be_instantiated()
     {
-        $items = new ItemCollection;
+        $items = new Collection;
 
-        $this->assertCount(0, $items);
-        $this->assertFalse($items->hasActiveItem());
+        static::assertCount(0, $items);
+        static::assertFalse($items->hasAnySelected());
     }
 
     /** @test */
@@ -31,15 +29,15 @@ class ItemCollectionTest extends TestCase
     {
         $items = $this->makeItemCollection();
 
-        $this->assertFalse($items->hasActiveItem());
+        static::assertFalse($items->hasAnySelected());
 
-        $items->setCurrent('home');
+        $items->setSelected('home');
 
-        $this->assertTrue($items->hasActiveItem());
+        static::assertTrue($items->hasAnySelected());
 
-        $items->setCurrent('blog');
+        $items->setSelected('blog');
 
-        $this->assertFalse($items->hasActiveItem());
+        static::assertFalse($items->hasAnySelected());
     }
 
     /** @test */
@@ -49,9 +47,8 @@ class ItemCollectionTest extends TestCase
             [
                 'name'        => 'home',
                 'title'       => 'Home',
-                'url'         => '/',
+                'url'         => $this->baseUrl,
                 'icon'        => 'home-icon',
-                'extra'       => [],
                 'active'      => false,
                 'children'    => [],
                 'roles'       => [],
@@ -59,10 +56,9 @@ class ItemCollectionTest extends TestCase
             ],
             [
                 'name'        => 'contact',
-                'title'       => 'CONTACT',
-                'url'         => '/contact',
+                'title'       => 'Contact',
+                'url'         => "{$this->baseUrl}/contact",
                 'icon'        => 'contact-icon',
-                'extra'       => [],
                 'active'      => false,
                 'children'    => [],
                 'roles'       => [],
@@ -70,8 +66,8 @@ class ItemCollectionTest extends TestCase
             ],
         ];
 
-        $this->assertEquals($expected, $this->makeItemCollection()->toArray());
-        $this->assertEquals(json_encode($expected), $this->makeItemCollection()->toJson());
+        static::assertEquals($expected, $this->makeItemCollection()->toArray());
+        static::assertEquals(json_encode($expected), $this->makeItemCollection()->toJson());
     }
 
     /* -----------------------------------------------------------------
@@ -82,13 +78,13 @@ class ItemCollectionTest extends TestCase
     /**
      * Make an item collection.
      *
-     * @return \Arcanesoft\Sidebar\Entities\ItemCollection
+     * @return \Arcanesoft\Sidebar\Collection
      */
     private function makeItemCollection()
     {
-        return tap(new ItemCollection, function (ItemCollection $items) {
-            $items->push(Item::make('home', 'Home', '/', 'home-icon'));
-            $items->push(Item::make('contact', 'CONTACT', '/contact', 'contact-icon'));
+        return tap(new Collection, function (Collection $items) {
+            $items->addItem(['name' => 'home', 'title' => 'Home', 'url' => '/', 'icon' => 'home-icon']);
+            $items->addItem(['name' => 'contact', 'title' => 'Contact', 'url' => '/contact', 'icon' => 'contact-icon']);
         });
     }
 }
